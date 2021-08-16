@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class LoginStepDefinitions {
 
     @Steps
-    CommonUtility commonUtility ;
+    CommonUtility commonUtility ; // contains some boilerplate codes 
     private final Logger log = LoggerFactory.getLogger(LoginStepDefinitions.class);
     Actor james;
 

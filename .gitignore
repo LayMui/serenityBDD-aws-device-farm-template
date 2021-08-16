@@ -8,6 +8,5 @@ target
 .idea
 .settings
 .DS_Store
-*.properties
 .factorypath
 .vscode
