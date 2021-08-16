@@ -107,9 +107,17 @@ public class CommonUtility {
     }
 
     public String setEnvironmentProperty() {
-            return environmentVariables.optionalProperty("outboxUrl")
-                    .orElse("https://msg-dev-vpce.uat3.test.aws.sg.singtelgroup.net");
+        if (environmentVariables.getProperty("environment").equals("staging")) {
+            return environmentVariables.optionalProperty("ext.outboxUrl")
+            .orElse("https://msg-ext.com");
+        }
+
+        return environmentVariables.optionalProperty("int.outboxUrl")
+                .orElse("https://msg-int.com");
+
     }
+
+
 }
 
 

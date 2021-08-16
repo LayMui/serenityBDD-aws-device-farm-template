@@ -11,19 +11,12 @@ import org.openqa.selenium.Keys;
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.*;
 import static net.serenitybdd.screenplay.questions.WebElementQuestion.the;
 import static net.serenitybdd.screenplay.waits.Wait.until;
-
-public class EnterCredentials {
-
-
-    public static Performable mobileNumber(String mobileNumber) {
+public class Confirms {
+    public static Performable termsAndConditions() {
         return Task.where(
-                "{0} attempts to enter #mobileNumber",
-                until(the(LoginPage.LOGIN_MOBILE_NUMBER), isVisible()).forNoLongerThan(30).seconds(),
-                Click.on(LoginPage.LOGIN_MOBILE_NUMBER),
-                Enter.theValue(mobileNumber).into(LoginPage.LOGIN_MOBILE_NUMBER_EDIT_TEXT).thenHit(Keys.ENTER));
+                "{0} attempts to click on terms and conditions",
+                WaitUntil.the(TermsAndConditions.TNC_I_AGREE_BTN, isVisible()).forNoMoreThan(30).seconds(),
+                Click.on(TermsAndConditions.TNC_I_AGREE_BTN));
     }
 
-
 }
-
-
