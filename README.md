@@ -16,7 +16,6 @@ mvn clean install -DskipTests=true
 ```
 ### serenity.sh script
 The serenity.sh script is created to simplify the test execution:      
-Pre-requisite: Assume you have docker engine installed in your local machine   
 Run ./serenity.sh with arguments 
 To run the test
 ```
@@ -33,7 +32,7 @@ Note:
 1. Change the appium.app in the serenity properties accordingly  
 2. Since appium is started separately in aws device farm, when you run it locally  
 you will need to start appium first before running the test  
- as the startAppium and stopAppium is commented out programmatically
+
 3. Add a @app to the specific test scenarios you want to test
 ## AWS Device Farm (this is using java command which is replaced by using maven, see serenity.yml)
 https://docs.aws.amazon.com/devicefarm/latest/developerguide/test-types-appium.html#test-types-appium-prepare
@@ -48,7 +47,9 @@ with
 4. serenity.yml is the test spec yml file configured/setup to run on AWS device farm environment
 it's a customised off from the default test spec file
 
-5. You need to create the assembly/zip.yml, if you are using java command (not required if you use maven command)
+5. If you are using java command 
+You need to create the assembly/zip.yml, 
+(not required if you use maven command)
 
 6. using maven command on aws device farm means you have to download the dependencies configured in pom.xml
 
