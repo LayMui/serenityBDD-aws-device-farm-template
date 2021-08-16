@@ -1,0 +1,183 @@
+version: 0.1
+# Phases are collection of commands that get executed on Device Farm.
+phases:
+  # The install phase includes commands that install dependencies that your tests use.
+  # Default dependencies for testing frameworks supported on Device Farm are already installed.
+  install:
+    commands:
+      # This test execution environment uses Appium version 1.9.1 by default, however we enable you to change it using the Appium version manager (avm). An
+      # example "avm" command below changes the version to 1.14.2.
+      # For your convenience, we have preinstalled the following versions: 1.9.1, 1.10.1, 1.11.1, 1.12.1, 1.13.0, 1.14.1, 1.14.2, 1.15.1 or 1.16.0.
+      # To use one of these Appium versions, change the version number in the "avm" command below to your desired version:
+
+      - >-
+        if [ "$DEVICEFARM_DEVICE_PLATFORM_NAME" = "iOS" ]; 
+        then
+            export APPIUM_VERSION=1.19.0
+        else
+            export APPIUM_VERSION=1.18.0
+        fi;
+
+      - avm $APPIUM_VERSION
+      - ln -s /usr/local/avm/versions/$APPIUM_VERSION/node_modules/.bin/appium  /usr/local/avm/versions/$APPIUM_VERSION/node_modules/appium/bin/appium.js
+      - >-
+
+        if [ "$DEVICEFARM_DEVICE_PLATFORM_NAME" = "iOS" ]; 
+        then
+         cd $DEVICEFARM_TEST_PACKAGE_PATH
+          curl -O https://mirrors.gigenet.com/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.zip
+          unzip apache-maven-3.6.3-bin.zip
+          export PATH=$PATH:$DEVICEFARM_TEST_PACKAGE_PATH/apache-maven-3.6.3/bin
+        fi;
+
+      - >-
+        if [ "$DEVICEFARM_DEVICE_PLATFORM_NAME" = "iOS" ]; 
+        then
+            if [ $(echo $APPIUM_VERSION | cut -d "." -f2) -ge 19 ];
+            then
+              DEVICEFARM_DEVICE_UDID_FOR_APPIUM=$(echo $DEVICEFARM_DEVICE_UDID | tr -d "-");
+              DEVICEFARM_WDA_DERIVED_DATA_PATH=$DEVICEFARM_WDA_DERIVED_DATA_PATH_V6;
+            elif [ $(echo $APPIUM_VERSION | cut -d "." -f2) -ge 18 ];
+            then
+              DEVICEFARM_DEVICE_UDID_FOR_APPIUM=$(echo $DEVICEFARM_DEVICE_UDID | tr -d "-");
+              DEVICEFARM_WDA_DERIVED_DATA_PATH=$DEVICEFARM_WDA_DERIVED_DATA_PATH_V5;
+            elif [ $(echo $APPIUM_VERSION | cut -d "." -f2) -ge 17 ];
+            then
+              DEVICEFARM_DEVICE_UDID_FOR_APPIUM=$(echo $DEVICEFARM_DEVICE_UDID | tr -d "-");
+              DEVICEFARM_WDA_DERIVED_DATA_PATH=$DEVICEFARM_WDA_DERIVED_DATA_PATH_V4;
+
+            elif [ $(echo $APPIUM_VERSION | cut -d "." -f2) -ge 16 ];
+            then
+              DEVICEFARM_DEVICE_UDID_FOR_APPIUM=$(echo $DEVICEFARM_DEVICE_UDID | tr -d "-");
+              DEVICEFARM_WDA_DERIVED_DATA_PATH=$DEVICEFARM_WDA_DERIVED_DATA_PATH_V3;
+
+            elif [ $(echo $APPIUM_VERSION | cut -d "." -f2) -ge 15 ];
+            then
+              DEVICEFARM_DEVICE_UDID_FOR_APPIUM=$(echo $DEVICEFARM_DEVICE_UDID | tr -d "-");
+              DEVICEFARM_WDA_DERIVED_DATA_PATH=$DEVICEFARM_WDA_DERIVED_DATA_PATH_V2;
+
+            else
+              DEVICEFARM_DEVICE_UDID_FOR_APPIUM=$DEVICEFARM_DEVICE_UDID;
+              DEVICEFARM_WDA_DERIVED_DATA_PATH=$DEVICEFARM_WDA_DERIVED_DATA_PATH_V1;
+            fi
+
+        fi;
+
+  # The pre-test phase includes commands that setup your test environment.
+  pre_test:
+    commands:
+      # Setup environment variables for java
+      - export CLASSPATH=$CLASSPATH:$DEVICEFARM_TESTNG_JAR
+      - export CLASSPATH=$CLASSPATH:$DEVICEFARM_TEST_PACKAGE_PATH/*
+      - export CLASSPATH=$CLASSPATH:$DEVICEFARM_TEST_PACKAGE_PATH/dependency-jars/*
+      # We recommend starting appium server process in the background using the command below.
+      # Appium server log will go to $DEVICEFARM_LOG_DIR directory.
+      # The environment variables below will be auto-populated during run time.
+      - echo "Start appium server"
+      - echo "$DEVICEFARM_DEVICE_NAME"
+      - echo "$DEVICEFARM_DEVICE_UDID_FOR_APPIUM"
+      - >-
+        appium --log-timestamp
+        --default-capabilities "{\"usePrebuiltWDA\":true, \"derivedDataPath\":\"$DEVICEFARM_WDA_DERIVED_DATA_PATH\",
+        \"deviceName\":\"$DEVICEFARM_DEVICE_NAME\", \"platformName\":\"$DEVICEFARM_DEVICE_PLATFORM_NAME\", \"app\":\"$DEVICEFARM_APP_PATH\",
+        \"automationName\":\"XCUITest\", \"udid\":\"$DEVICEFARM_DEVICE_UDID_FOR_APPIUM\", \"platformVersion\":\"$DEVICEFARM_DEVICE_OS_VERSION\"}"
+        >> $DEVICEFARM_LOG_DIR/appiumlog.txt 2>&1 &
+       - >-
+
+        start_appium_timeout=0;
+        while [ true ];
+        do
+            if [ $start_appium_timeout -gt 60 ];
+            then
+                echo "appium server never started in 60 seconds. Exiting";
+                exit 1;
+            fi;
+
+            grep -i "Appium REST http interface listener started on 0.0.0.0:4723" $DEVICEFARM_LOG_DIR/appiumlog.txt >> /dev/null 2>&1;
+            if [ $? -eq 0 ];
+            then
+                echo "Appium REST http interface listener started on 0.0.0.0:4723";
+                break;
+            else
+                echo "Waiting for appium server to start. Sleeping for 1 second";
+                sleep 1;
+
+                start_appium_timeout=$((start_appium_timeout+1));
+            fi;
+        done;
+
+  # The test phase includes commands that start your test suite execution.
+
+  test:
+
+    commands:
+
+      # Your test package is downloaded in $DEVICEFARM_TEST_PACKAGE_PATH so we first change directory to that path.
+
+      - echo "Navigate to test package directory"
+
+      - cd $DEVICEFARM_TEST_PACKAGE_PATH
+
+ 
+
+      # By default, the following command is used by Device Farm to run your Appium JUnit test.
+
+      # Note : DeviceFarm is using the TestNG runner to run the jUnit tests.
+
+      # The goal is to run to your tests jar file with all the dependencies jars in the CLASSPATH.
+
+      # Alternatively, You may specify your customized command.
+
+      # Note: For most use cases, the default command works fine.
+
+      # Please refer "http://testng.org/doc/documentation-main.html#junit" for more options on running JUnit tests using TestNG runner from the command line.
+
+      - echo "Start Appium JUnit test"
+
+      - cd $DEVICEFARM_TEST_PACKAGE_PATH/serenityBDD-aws-device-farm-template
+
+      - >-
+
+        if [ "$DEVICEFARM_DEVICE_PLATFORM_NAME" = "iOS" ]; 
+
+        then
+
+            PLATFORMNAME="XCUITest"
+
+        else
+
+            PLATFORMNAME="uiautomator2"
+
+        fi;
+
+ 
+
+      - mvn clean verify -Dwebdriver.driver=appium -Dcucumber.filter.tags="@app" -Dappium.automationName=$PLATFORMNAME -Denvironment=staging -Dappium.screenshots.dir=$DEVICEFARM_SCREENSHOT_PATH -Dappium.autoAcceptAlerts=true -Dappium.autoGrantPermissions=true -Dappium.platformName=$DEVICEFARM_DEVICE_PLATFORM_NAME -Dappium.app=$DEVICEFARM_APP_PATH
+
+ 
+
+  # The post test phase includes are commands that are run after your tests are executed.
+
+  post_test:
+
+    commands:
+
+      - cp -r $DEVICEFARM_TEST_PACKAGE_PATH/serenityBDD-aws-device-farm-template/target $DEVICEFARM_LOG_DIR/target
+
+     
+
+      
+
+# The artifacts phase lets you specify the location where your tests logs, device logs will be stored.
+
+# And also let you specify the location of your test logs and artifacts which you want to be collected by Device Farm.
+
+# These logs and artifacts will be available through ListArtifacts API in Device Farm.
+
+artifacts:
+
+  # By default, Device Farm will collect your artifacts from following directories
+
+  - $DEVICEFARM_LOG_DIR
+
+  - $DEVICEFARM_LOG_DIR/target
