@@ -53,5 +53,6 @@ You need to create the assembly/zip.yml,
 
 6. using maven command on aws device farm means you have to download the dependencies configured in pom.xml
 
-7. run the pack.sh to package the test artifact to upload on aws device farm
+7. Run mvn clean package to generate the artefact that the project makes at target folder
+8. Run the pack.sh script to package the test artifact to upload on aws device farm
 

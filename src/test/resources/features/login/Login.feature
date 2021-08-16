@@ -1,8 +1,8 @@
 
 Feature:  Login
-    In order to get full access to the services for non main account holder
-    As a mobile non main account user, James
-    James want to be able to use otp (One-Time Password) 
+    In order to get full access to the services 
+    As a mobile user James
+    James want to be able to login using his mobile number
 
 Background:
     Given James is at the app
