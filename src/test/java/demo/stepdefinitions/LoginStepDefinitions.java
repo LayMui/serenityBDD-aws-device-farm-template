@@ -1,5 +1,5 @@
 package demo.stepdefinitions;
-import demo.tasks.Confirms;
+
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -9,7 +9,6 @@ import io.cucumber.java.en.When;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.actors.OnStage;
 import net.serenitybdd.screenplay.actors.OnlineCast;
-import net.serenitybdd.screenplay.rest.abilities.CallAnApi;
 import net.thucydides.core.annotations.Steps;
 
 import static net.serenitybdd.screenplay.actors.OnStage.theActorCalled;
